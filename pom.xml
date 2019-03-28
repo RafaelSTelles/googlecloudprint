@@ -135,6 +135,10 @@
 							<goal>sign</goal>
 						</goals>
 						<configuration>
+							<gpgArguments>
+								<arg>--pinentry-mode</arg>
+								<arg>loopback</arg>
+							</gpgArguments>
 							<homedir>${gpg.homedir}</homedir>
 							<passphrase>${gpg.passphrase}</passphrase>
 						</configuration>
