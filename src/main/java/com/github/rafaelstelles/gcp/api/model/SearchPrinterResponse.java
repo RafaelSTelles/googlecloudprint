@@ -2,22 +2,15 @@ package com.github.rafaelstelles.gcp.api.model;
 
 import java.util.List;
 
-public class SearchPrinterResponse extends CloudPrintResponse{
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-    private List<Printer> printers;
+@Getter
+@Setter
+@ToString
+public class SearchPrinterResponse extends CloudPrintResponse {
 
-    public List<Printer> getPrinters() {
-        return printers;
-    }
+	private List<Printer> printers;
 
-    public void setPrinters(List<Printer>  printers) {
-        this.printers = printers;
-    }
-
-	@Override
-	public String toString() {
-		return "SearchPrinterResponse{" +
-				"printers=" + printers +
-				"} " + super.toString();
-	}
 }

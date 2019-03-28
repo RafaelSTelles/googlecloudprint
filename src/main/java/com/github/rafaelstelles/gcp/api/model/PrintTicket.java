@@ -7,9 +7,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Ticket {
+public class PrintTicket {
 
-    private String version = "1.0";
-	private PrintTicket print;
+	private CopiesTicket copies = new CopiesTicket(1);
 
 }
