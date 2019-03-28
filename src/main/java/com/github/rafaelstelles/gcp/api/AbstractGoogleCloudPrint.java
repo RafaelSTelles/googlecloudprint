@@ -89,8 +89,8 @@ public abstract class AbstractGoogleCloudPrint {
 		return gson.fromJson(new StringReader(response), SearchPrinterResponse.class);
 	}
 
-	public void sendDocument(final String title, final String contentType, final String printerId,
-							 final byte[] content, final int copias) throws Exception {
+	public void sendDocumentToPrint(final String title, final String contentType, final String printerId,
+									final byte[] content, final int copias) throws Exception {
 		try {
 			final Ticket ticket = new Ticket();
 			final PrintTicket print = new PrintTicket();
@@ -104,7 +104,7 @@ public abstract class AbstractGoogleCloudPrint {
 			submitJob.setPrinterId(printerId);
 			submitJob.setTicket(ticket);
 			submitJob.setTitle(title);
-			final SubmitJobResponse response = sendDocument(submitJob);
+			final SubmitJobResponse response = sendDocumentToPrint(submitJob);
 			if (response != null) {
 				log.info(String.format("googlecloudprint response %s", response));
 			} else {
@@ -115,7 +115,7 @@ public abstract class AbstractGoogleCloudPrint {
 		}
 	}
 
-	private SubmitJobResponse sendDocument(final SubmitJob submitJob) throws CloudPrintException {
+	private SubmitJobResponse sendDocumentToPrint(final SubmitJob submitJob) throws CloudPrintException {
 		String response = "";
 		try {
 			final byte[] contentBase64 = Base64.getEncoder().encode(submitJob.getContent());
