@@ -1,11 +1,11 @@
 package com.github.rafaelstelles.gcp.api.model;
 
 /**
- * Status of the job, which can be one of the following:<br/><br/>
- * <b>QUEUED</b>: Job just added and has not yet been downloaded.<br/>
+ * Status of the job, which can be one of the following:<br><br>
+ * <b>QUEUED</b>: Job just added and has not yet been downloaded.<br>
  * <b>IN_PROGRESS</b>: Job downloaded and has been added to the client-side
- * native printer queue.<br/>
- * <b>DONE</b>: Job printed successfully.<br/>
+ * native printer queue.<br>
+ * <b>DONE</b>: Job printed successfully.<br>
  * <b>ERROR</b>: Job cannot be printed due to an error.
  *
  * @author jittagorn pitakmetagoon

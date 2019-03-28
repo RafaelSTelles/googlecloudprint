@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 /**
  *
  * @author jittagorn pitakmetagoon
- * @reference
  * https://developers.google.com/cloud-print/docs/appInterfaces#submit
  */
 public class SubmitJob {
