@@ -62,7 +62,7 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	public SearchPrinterResponse findAllPrinters() throws CloudPrintException {
-		String response = openConnection("/search?output=json&use_cdd=true", null);
+		final String response = openConnection("/search?output=json&use_cdd=true", null);
 		return gson.fromJson(new StringReader(response), SearchPrinterResponse.class);
 	}
 
@@ -71,7 +71,7 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	public SearchPrinterResponse findPrinter(final String printerName, final PrinterStatus status) throws CloudPrintException {
-		String response = openConnection("/search?output=json" +
+		final String response = openConnection("/search?output=json" +
 				"&q=" + printerName +
 				"&connection_status=" + status);
 
@@ -79,7 +79,7 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	public ProcessInviteResponse processInvite(final String printerId, boolean accept) throws CloudPrintException {
-		String response = openConnection("/processinvite?output=json" +
+		final String response = openConnection("/processinvite?output=json" +
 				"&printerid=" + printerId +
 				"&accept=" + accept);
 
@@ -113,7 +113,6 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	private SubmitJobResponse sendDocumentToPrint(final SubmitJob submitJob) throws CloudPrintException {
-		String response = "";
 		try {
 			final byte[] contentBase64 = Base64.getEncoder().encode(submitJob.getContent());
 
@@ -129,11 +128,12 @@ public abstract class AbstractGoogleCloudPrint {
 					entity.addTextBody("tag", tag);
 				}
 			}
-			response = openConnection("/submit?output=json&printerid=" + submitJob.getPrinterId(), entity);
+			final String response = openConnection("/submit?output=json&printerid=" + submitJob.getPrinterId(), entity);
+
+			return gson.fromJson(new StringReader(response), SubmitJobResponse.class);
 		} catch (Exception ex) {
 			throw new CloudPrintException(ex);
 		}
-		return gson.fromJson(new StringReader(response), SubmitJobResponse.class);
 	}
 
 	public abstract String getAccessToken();
