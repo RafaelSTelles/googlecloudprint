@@ -15,6 +15,7 @@ import com.github.rafaelstelles.gcp.api.exception.CloudPrintException;
 import com.github.rafaelstelles.gcp.api.model.CopiesTicket;
 import com.github.rafaelstelles.gcp.api.model.PrintTicket;
 import com.github.rafaelstelles.gcp.api.model.PrinterStatus;
+import com.github.rafaelstelles.gcp.api.model.ProcessInviteResponse;
 import com.github.rafaelstelles.gcp.api.model.SearchPrinterResponse;
 import com.github.rafaelstelles.gcp.api.model.SubmitJob;
 import com.github.rafaelstelles.gcp.api.model.SubmitJobResponse;
@@ -87,6 +88,14 @@ public abstract class AbstractGoogleCloudPrint {
 				"&connection_status=" + status);
 
 		return gson.fromJson(new StringReader(response), SearchPrinterResponse.class);
+	}
+
+	public ProcessInviteResponse processInvite(final String printerId, boolean accept) throws CloudPrintException {
+		String response = openConnection("/processinvite?output=json" +
+				"&printerid=" + printerId +
+				"&accept=" + accept);
+
+		return gson.fromJson(new StringReader(response), ProcessInviteResponse.class);
 	}
 
 	public void sendDocumentToPrint(final String title, final String contentType, final String printerId,
