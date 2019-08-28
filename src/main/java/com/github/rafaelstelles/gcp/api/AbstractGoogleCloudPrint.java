@@ -99,7 +99,7 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	public void sendDocumentToPrint(final String title, final String contentType, final String printerId,
-									final byte[] content, final int copias) throws Exception {
+									final byte[] content, final int copias) throws CloudPrintException {
 		try {
 			final Ticket ticket = new Ticket();
 			final PrintTicket print = new PrintTicket();
