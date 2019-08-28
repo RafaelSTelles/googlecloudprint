@@ -1,6 +1,5 @@
 package com.github.rafaelstelles.gcp.api;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.Base64;
@@ -38,9 +37,7 @@ public abstract class AbstractGoogleCloudPrint {
 	private String openConnection(final String serviceAndParameters, final MultipartEntityBuilder entity) throws CloudPrintException {
 		final String accessToken = getAccessToken();
 
-		String response = "";
 		HttpPost httpPost = null;
-		InputStream inputStream = null;
 		try {
 			final String request = CLOUD_PRINT_URL + serviceAndParameters;
 			final HttpClient httpClient = HttpClientBuilder.create().build();
@@ -52,25 +49,16 @@ public abstract class AbstractGoogleCloudPrint {
 			}
 
 			final HttpResponse httpResponse = httpClient.execute(httpPost);
-			inputStream = httpResponse.getEntity().getContent();
-			response = ResponseUtils.streamToString(inputStream);
+			try (InputStream inputStream = httpResponse.getEntity().getContent()) {
+				return ResponseUtils.streamToString(inputStream);
+			}
 		} catch (Exception ex) {
 			throw new CloudPrintException(ex);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ex) {
-					throw new CloudPrintException(ex);
-				}
-			}
-
 			if (httpPost != null && !httpPost.isAborted()) {
 				httpPost.abort();
 			}
-
 		}
-		return response;
 	}
 
 	public SearchPrinterResponse findAllPrinters() throws CloudPrintException {
