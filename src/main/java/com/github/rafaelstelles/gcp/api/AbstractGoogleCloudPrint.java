@@ -13,6 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.github.rafaelstelles.gcp.api.exception.CloudPrintException;
 import com.github.rafaelstelles.gcp.api.model.CopiesTicket;
+import com.github.rafaelstelles.gcp.api.model.Document;
 import com.github.rafaelstelles.gcp.api.model.PrintTicket;
 import com.github.rafaelstelles.gcp.api.model.PrinterStatus;
 import com.github.rafaelstelles.gcp.api.model.SearchPrinterResponse;
@@ -89,8 +90,13 @@ public abstract class AbstractGoogleCloudPrint {
 		return gson.fromJson(new StringReader(response), SearchPrinterResponse.class);
 	}
 
+	public void sendDocumentToPrint(final Document document, final String printerId) throws CloudPrintException {
+		sendDocumentToPrint(document.getFileName(), document.getContentType(), printerId,
+				document.getFile(), document.getCopies());
+	}
+
 	public void sendDocumentToPrint(final String title, final String contentType, final String printerId,
-									final byte[] content, final int copias) throws Exception {
+									final byte[] content, final int copias) throws CloudPrintException {
 		try {
 			final Ticket ticket = new Ticket();
 			final PrintTicket print = new PrintTicket();
