@@ -1,9 +1,11 @@
 package com.github.rafaelstelles.gcp.api;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -16,6 +18,7 @@ import com.github.rafaelstelles.gcp.api.model.CopiesTicket;
 import com.github.rafaelstelles.gcp.api.model.Document;
 import com.github.rafaelstelles.gcp.api.model.PrintTicket;
 import com.github.rafaelstelles.gcp.api.model.PrinterStatus;
+import com.github.rafaelstelles.gcp.api.model.ProcessInviteResponse;
 import com.github.rafaelstelles.gcp.api.model.SearchPrinterResponse;
 import com.github.rafaelstelles.gcp.api.model.SubmitJob;
 import com.github.rafaelstelles.gcp.api.model.SubmitJobResponse;
@@ -38,9 +41,7 @@ public abstract class AbstractGoogleCloudPrint {
 	private String openConnection(final String serviceAndParameters, final MultipartEntityBuilder entity) throws CloudPrintException {
 		final String accessToken = getAccessToken();
 
-		String response = "";
 		HttpPost httpPost = null;
-		InputStream inputStream = null;
 		try {
 			final String request = CLOUD_PRINT_URL + serviceAndParameters;
 			final HttpClient httpClient = HttpClientBuilder.create().build();
@@ -52,29 +53,20 @@ public abstract class AbstractGoogleCloudPrint {
 			}
 
 			final HttpResponse httpResponse = httpClient.execute(httpPost);
-			inputStream = httpResponse.getEntity().getContent();
-			response = ResponseUtils.streamToString(inputStream);
+			try (InputStream inputStream = httpResponse.getEntity().getContent()) {
+				return ResponseUtils.streamToString(inputStream);
+			}
 		} catch (Exception ex) {
 			throw new CloudPrintException(ex);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ex) {
-					throw new CloudPrintException(ex);
-				}
-			}
-
 			if (httpPost != null && !httpPost.isAborted()) {
 				httpPost.abort();
 			}
-
 		}
-		return response;
 	}
 
 	public SearchPrinterResponse findAllPrinters() throws CloudPrintException {
-		String response = openConnection("/search?output=json&use_cdd=true", null);
+		final String response = openConnection("/search?output=json&use_cdd=true", null);
 		return gson.fromJson(new StringReader(response), SearchPrinterResponse.class);
 	}
 
@@ -83,20 +75,33 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	public SearchPrinterResponse findPrinter(final String printerName, final PrinterStatus status) throws CloudPrintException {
-		String response = openConnection("/search?output=json" +
+		final String response = openConnection("/search?output=json" +
 				"&q=" + printerName +
 				"&connection_status=" + status);
 
 		return gson.fromJson(new StringReader(response), SearchPrinterResponse.class);
 	}
 
+	public ProcessInviteResponse processInvite(final String printerId, boolean accept) throws CloudPrintException {
+		final String response = openConnection("/processinvite?output=json" +
+				"&printerid=" + printerId +
+				"&accept=" + accept);
+
+		return gson.fromJson(new StringReader(response), ProcessInviteResponse.class);
+	}
+
 	public void sendDocumentToPrint(final Document document, final String printerId) throws CloudPrintException {
 		sendDocumentToPrint(document.getFileName(), document.getContentType(), printerId,
-				document.getFile(), document.getCopies());
+				document.getFile(), document.getCopies(), document.getTags());
 	}
 
 	public void sendDocumentToPrint(final String title, final String contentType, final String printerId,
 									final byte[] content, final int copias) throws CloudPrintException {
+		sendDocumentToPrint(title, contentType, printerId, content, copias, new HashSet<>());
+	}
+
+	public void sendDocumentToPrint(final String title, final String contentType, final String printerId,
+									final byte[] content, final int copias, final Set<String> tags) throws CloudPrintException {
 		try {
 			final Ticket ticket = new Ticket();
 			final PrintTicket print = new PrintTicket();
@@ -110,6 +115,7 @@ public abstract class AbstractGoogleCloudPrint {
 			submitJob.setPrinterId(printerId);
 			submitJob.setTicket(ticket);
 			submitJob.setTitle(title);
+			submitJob.setTag(new ArrayList<>(tags));
 			final SubmitJobResponse response = sendDocumentToPrint(submitJob);
 			if (response != null) {
 				log.info(String.format("googlecloudprint response %s", response));
@@ -122,7 +128,6 @@ public abstract class AbstractGoogleCloudPrint {
 	}
 
 	private SubmitJobResponse sendDocumentToPrint(final SubmitJob submitJob) throws CloudPrintException {
-		String response = "";
 		try {
 			final byte[] contentBase64 = Base64.getEncoder().encode(submitJob.getContent());
 
@@ -138,11 +143,12 @@ public abstract class AbstractGoogleCloudPrint {
 					entity.addTextBody("tag", tag);
 				}
 			}
-			response = openConnection("/submit?output=json&printerid=" + submitJob.getPrinterId(), entity);
+			final String response = openConnection("/submit?output=json&printerid=" + submitJob.getPrinterId(), entity);
+
+			return gson.fromJson(new StringReader(response), SubmitJobResponse.class);
 		} catch (Exception ex) {
 			throw new CloudPrintException(ex);
 		}
-		return gson.fromJson(new StringReader(response), SubmitJobResponse.class);
 	}
 
 	public abstract String getAccessToken();
