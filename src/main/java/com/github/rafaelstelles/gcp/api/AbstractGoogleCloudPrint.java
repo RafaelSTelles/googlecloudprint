@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -31,6 +32,7 @@ import lombok.extern.java.Log;
 @Log
 public abstract class AbstractGoogleCloudPrint {
 
+	private static final int CONNECTION_TIMEOUT_MS = 60 * 1000;
 	private static final String CLOUD_PRINT_URL = "https://www.google.com/cloudprint";
 	private static final Gson gson = new Gson();
 
@@ -44,7 +46,14 @@ public abstract class AbstractGoogleCloudPrint {
 		HttpPost httpPost = null;
 		try {
 			final String request = CLOUD_PRINT_URL + serviceAndParameters;
-			final HttpClient httpClient = HttpClientBuilder.create().build();
+			final RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectionRequestTimeout(CONNECTION_TIMEOUT_MS)
+					.setConnectTimeout(CONNECTION_TIMEOUT_MS)
+					.setSocketTimeout(CONNECTION_TIMEOUT_MS)
+					.build();
+			final HttpClient httpClient = HttpClientBuilder.create()
+					.setDefaultRequestConfig(requestConfig)
+					.build();
 			httpPost = new HttpPost(request);
 			httpPost.setHeader("Authorization", "OAuth " + accessToken);
 
