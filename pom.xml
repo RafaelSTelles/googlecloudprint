@@ -10,7 +10,7 @@
 
     <properties>
         <google.api.version>1.28.0</google.api.version>
-        <httpcomponents.version>4.5.7</httpcomponents.version>
+        <httpcomponents.version>4.5.13</httpcomponents.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <github.global.server>github</github.global.server>
